@@ -13,6 +13,7 @@
 #include <gl/glm/gtc/type_ptr.hpp>
 #include "func.h"
 #include "ball.h"
+#include "cylinder.h"
 
 extern float line[3][2][3];
 extern float line_colors[3][2][3];
@@ -26,3 +27,4 @@ extern GLuint shaderProgramID1;
 extern glm::mat4 projection;
 extern glm::mat4 view;
 extern Ball ball;
+extern Cylinder cylinder;

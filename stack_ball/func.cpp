@@ -30,8 +30,11 @@ GLvoid drawScene()
 	unsigned int modelLocation = glGetUniformLocation(shaderProgramID, "modelTransform");
 	glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(Tx0));
 	
-	gluQuadricDrawStyle(ball.qobj,GLU_LINE);
-	gluSphere(ball.qobj, ball.radius, ball.slices, ball.stacks);
+	gluQuadricDrawStyle(cylinder.qobj, GLU_LINE);
+	//gluCylinder(cylinder.qobj, cylinder.base_radius, cylinder.top_radius, cylinder.height, cylinder.slices, cylinder.stacks);
+
+	//gluQuadricDrawStyle(ball.qobj,GLU_LINE);
+	//gluSphere(ball.qobj, ball.radius, ball.slices, ball.stacks);
 
 	for (int i = 0; i < 3; ++i) {
 		glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
