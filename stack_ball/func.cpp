@@ -2,7 +2,7 @@
 
 glm::mat4 projection = glm::perspective(glm::radians(45.0f), 4.0f / 3.0f, 0.1f, 100.0f);
 
-glm::vec3 cameraPos = glm::vec3(2.0f, 3.0f, 5.0f); //--- 카메라 위치
+glm::vec3 cameraPos = glm::vec3(0.0f, 3.0f, 5.0f); //--- 카메라 위치
 glm::vec3 cameraDirection = glm::vec3(0.0f, 0.0f, 0.0f); //--- 카메라 바라보는 방향
 glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f); //--- 카메라 위쪽 방향
 glm::mat4 view = glm::lookAt(cameraPos, cameraDirection, cameraUp);
@@ -29,6 +29,9 @@ GLvoid drawScene()
 
 	unsigned int modelLocation = glGetUniformLocation(shaderProgramID, "modelTransform");
 	glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(Tx0));
+	
+	gluQuadricDrawStyle(ball.qobj,GLU_LINE);
+	gluSphere(ball.qobj, ball.radius, ball.slices, ball.stacks);
 
 	for (int i = 0; i < 3; ++i) {
 		glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);

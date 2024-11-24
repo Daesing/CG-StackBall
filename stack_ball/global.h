@@ -1,3 +1,4 @@
+#pragma once
 #define _CRT_SECURE_NO_WARNINGS
 #include <iostream>
 #include <GL/glew.h>
@@ -11,7 +12,7 @@
 #include <gl/glm/gtc/matrix_transform.hpp>
 #include <gl/glm/gtc/type_ptr.hpp>
 #include "func.h"
-
+#include "ball.h"
 
 extern float line[3][2][3];
 extern float line_colors[3][2][3];
@@ -24,3 +25,4 @@ extern GLuint shaderProgramID1;
 
 extern glm::mat4 projection;
 extern glm::mat4 view;
+extern Ball ball;
