@@ -17,6 +17,8 @@ GLvoid drawScene()
 	glUseProgram(shaderProgramID);
 
 	glm::mat4 Tx0 = glm::mat4(1.0f);
+	glm::mat4 Tx1 = glm::mat4(1.0f);
+
 	
 	unsigned int projectionLocation = glGetUniformLocation(shaderProgramID, "projectionTransform");
 	glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, &projection[0][0]);
@@ -30,11 +32,10 @@ GLvoid drawScene()
 	unsigned int modelLocation = glGetUniformLocation(shaderProgramID, "modelTransform");
 	glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(Tx0));
 	
-	gluQuadricDrawStyle(cylinder.qobj, GLU_LINE);
-	//gluCylinder(cylinder.qobj, cylinder.base_radius, cylinder.top_radius, cylinder.height, cylinder.slices, cylinder.stacks);
+	
 
-	//gluQuadricDrawStyle(ball.qobj,GLU_LINE);
-	//gluSphere(ball.qobj, ball.radius, ball.slices, ball.stacks);
+	gluQuadricDrawStyle(ball.qobj,GLU_LINE);
+	gluSphere(ball.qobj, ball.radius, ball.slices, ball.stacks);
 
 	for (int i = 0; i < 3; ++i) {
 		glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
@@ -44,6 +45,11 @@ GLvoid drawScene()
 
 		glDrawArrays(GL_LINES, 0, 2);
 	}
+
+	glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(cylinder.model_matrix));
+	gluQuadricDrawStyle(cylinder.qobj, GLU_LINE);
+	gluCylinder(cylinder.qobj, cylinder.base_radius, cylinder.top_radius, cylinder.height, cylinder.slices, cylinder.stacks);
+
 	glutSwapBuffers();
 }
 
