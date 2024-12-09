@@ -1,6 +1,7 @@
 ﻿#define _CRT_SECURE_NO_WARNINGS
 #include "global.h"
 #include "object.h"
+#include "ball.h"
 
 #define Width 800
 #define Height 600
@@ -17,11 +18,7 @@ std::uniform_real_distribution<double> dis(-0.9, 0.9);
 
 
 
-Object sphere("sphere.obj");
-Object jet("jettSimple.obj");
-
-//std::vector<glm::vec3> sphere = ReadObj("sphere.obj");
-
+Ball sphere("sphere.obj");
 
 GLvoid InitBuffer(Object&);
 char* filetobuf(const char* file);
@@ -52,10 +49,11 @@ void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설�
 	glewInit();
 	make_shaderProgram();
 	InitBuffer(sphere);
-	InitBuffer(jet);
 	glutDisplayFunc(drawScene);
 	glutKeyboardFunc(Keyboard);
 	glutReshapeFunc(Reshape);
+	glutTimerFunc(60,TimerFunction,1);
+	
 	glutMainLoop();
 }
 
@@ -103,7 +101,7 @@ void InitBuffer(Object& input)
 	glBindVertexArray(input.vao);
 
 	for (int i = 1; i < input.obj.size(); i += 2) {
-		input.obj[i] = glm::vec3(0.0, 1.0, 0.0);
+		input.obj[i] = input.color;
 	}
 
 	// 데이터 분리: 정점 및 색상
@@ -228,6 +226,14 @@ GLvoid Keyboard(unsigned char key, int x, int y) {
 	}
 }
 
+//Timer ball animation
 GLvoid TimerFunction(int value) {
-
+	switch (value)
+	{
+	case 1:
+		sphere.matrix *= glm::translate(sphere.matrix, glm::vec3(0.0, 0.5, 0.0));
+		break;
+	default:
+		break;
+	}
 }

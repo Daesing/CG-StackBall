@@ -2,6 +2,7 @@
 
 Object::Object(std::string name) {
 	obj = ReadObj(name);
+	std::cout << "object: " << name << '\n';
 }
 
 

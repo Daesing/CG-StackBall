@@ -21,6 +21,12 @@
     <ClCompile Include="object.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="ball.h">
+      <Filter>헤더 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="ball.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="object.h">
