@@ -1,5 +1,31 @@
 #include "ball.h"
 
-Ball::Ball(std::string name):Object(name) {
-	color = glm::vec3(1.0f, 0.0f, 0.0f);
+// 생성자: 초기화
+Ball::Ball(std::string name)
+    : Object(name),
+      velocity(0.0f, 4.0f, 0.0f),
+      gravity(-20.0f),   // 중력 가속도
+      elasticity(1.0f),  // 완전 탄성 충돌
+      groundLevel(0.0f),
+      initialVelocity(10.0f) // 초기 속도 설정
+{
+    color = glm::vec3(1.0f, 0.0f, 0.0f);    // 공의 색상
+    position = glm::vec3(0.0f, 4.0f, 0.0f); // 초기 위치
+}
+
+// 공 업데이트
+void Ball::update_ball(float deltaTime) {
+    // 속도와 위치 업데이트
+    velocity.y += gravity * deltaTime;       // 중력으로 인한 속도 변화
+    position.y += velocity.y * deltaTime;   // 속도로 위치 변화
+
+    // 바닥에 충돌하면 튕기기
+    if (position.y <= groundLevel) {
+        position.y = groundLevel;           // 바닥에 위치 고정
+        velocity.y = initialVelocity;       // 초기 속도로 반전
+    }
+
+    // 모델 변환 행렬 갱신
+    matrix = glm::mat4(1.0f);               // 행렬 초기화
+    matrix = glm::translate(matrix, position); // 새로운 위치로 이동
 }

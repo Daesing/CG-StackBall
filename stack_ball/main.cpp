@@ -52,7 +52,7 @@ void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설�
 	glutDisplayFunc(drawScene);
 	glutKeyboardFunc(Keyboard);
 	glutReshapeFunc(Reshape);
-	glutTimerFunc(60,TimerFunction,1);
+	glutTimerFunc(15,TimerFunction,1);
 	
 	glutMainLoop();
 }
@@ -91,6 +91,7 @@ GLvoid drawScene() //--- 콜백 함수: 그리기 콜백 함수
 
 	glBindVertexArray(sphere.vao);
 	glDrawArrays(GL_TRIANGLES, 0, sphere.obj.size());
+
 
 	glutSwapBuffers(); //--- 화면에 출력하기
 }
@@ -228,12 +229,16 @@ GLvoid Keyboard(unsigned char key, int x, int y) {
 
 //Timer ball animation
 GLvoid TimerFunction(int value) {
-	switch (value)
-	{
-	case 1:
-		sphere.matrix *= glm::translate(sphere.matrix, glm::vec3(0.0, 0.5, 0.0));
-		break;
-	default:
-		break;
-	}
+
+	static float lastTime = 0.0f;
+	float currentTime = glutGet(GLUT_ELAPSED_TIME) / 1000.0f; // 초 단위
+	float deltaTime = currentTime - lastTime;
+	lastTime = currentTime;
+
+	sphere.update_ball(deltaTime); // 공 상태 업데이트
+
+	glutTimerFunc(16, TimerFunction, 1);
+	glutPostRedisplay();
+
+
 }
