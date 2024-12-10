@@ -22,6 +22,14 @@ std::uniform_real_distribution<double> dis(-0.9, 0.9);
 Ball sphere("sphere.obj");
 Cylinder pillar("cylinder.obj");
 Segment segment("segment.obj");
+Segment segments[6] = {
+	Segment("segment.obj"),
+	Segment("segment.obj"),
+	Segment("segment.obj"),
+	Segment("segment.obj"),
+	Segment("segment.obj"),
+	Segment("segment.obj"),
+};
 
 GLvoid InitBuffer(Object&);
 char* filetobuf(const char* file);
@@ -33,12 +41,30 @@ GLvoid Keyboard(unsigned char key, int x, int y);
 GLvoid TimerFunction(int value);
 GLvoid Reshape(int w, int h);
 
+
 GLint width, height;
 GLuint shaderProgramID; //--- 세이더 프로그램 이름
 GLuint vertexShader; //--- 버텍스 세이더 객체
 GLuint fragmentShader; //--- 프래그먼트 세이더 객체
 GLchar* vertexSource, * fragmentSource; //--- 소스코드 저장 변수
-//--- 메인 함수
+GLint modelLocation, viewLocation, projectionLocation;
+
+
+// 초기화 함수에서 유니폼 위치를 가져옵니다.
+void initializeUniformLocations(GLuint shaderProgramID, GLint& modelLocation, GLint& viewLocation, GLint& projectionLocation) {
+	modelLocation = glGetUniformLocation(shaderProgramID, "modelTransform");
+	viewLocation = glGetUniformLocation(shaderProgramID, "viewTransform");
+	projectionLocation = glGetUniformLocation(shaderProgramID, "projectionTransform");
+
+	if (modelLocation == -1 || viewLocation == -1 || projectionLocation == -1) {
+		std::cerr << "Failed to find uniform locations!" << std::endl;
+	}
+}
+
+void initializeShaderUniforms() {
+	initializeUniformLocations(shaderProgramID, modelLocation, viewLocation, projectionLocation);
+}
+
 void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설정
 {
 	//--- 윈도우 생성하기
@@ -54,6 +80,7 @@ void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설�
 	InitBuffer(sphere);
 	InitBuffer(pillar);
 	InitBuffer(segment);
+	initializeShaderUniforms();
 	glutDisplayFunc(drawScene);
 	glutKeyboardFunc(Keyboard);
 	glutReshapeFunc(Reshape);
@@ -63,57 +90,39 @@ void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설�
 }
 
 
-GLvoid drawScene() //--- 콜백 함수: 그리기 콜백 함수
-{
+void drawScene() {
 	GLfloat rColor, gColor, bColor;
-	rColor = bColor = 1.0;
-	gColor = 1.0;
-	//--- 변경된 배경색 설정
+	rColor = bColor = 1.0f;
+	gColor = 1.0f;
+
+	// 배경 초기화
 	glClearColor(rColor, gColor, bColor, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
-	//glEnable(GL_CULL_FACE); // 컬링 활성화
 
-	//--- 렌더링 파이프라인에 세이더 불러오기
+	// 셰이더 활성화
 	glUseProgram(shaderProgramID);
-	glm::vec3 cameraPos = glm::vec3(0.0f, 2.0f, 5.0f);										//--- 카메라 위치
-	glm::vec3 cameraDirection = glm::vec3(0.0f, 0.0f, 0.0f);								//--- 카메라 바라보는 방향
-	glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);										//--- 카메라 위쪽 방향
-	glm::mat4 view = glm::mat4(1.0f);
 
-	view = glm::lookAt(cameraPos, cameraDirection, cameraUp);
-	unsigned int viewLocation = glGetUniformLocation(shaderProgramID, "viewTransform");		//--- 뷰잉 변환 설정
-	glUniformMatrix4fv(viewLocation, 1, GL_FALSE, &view[0][0]);
+	// 카메라 설정
+	glm::vec3 cameraPos = glm::vec3(0.0f, 2.0f, 5.0f);
+	glm::vec3 cameraDirection = glm::vec3(0.0f, 0.0f, 0.0f);
+	glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+	glm::mat4 view = glm::lookAt(cameraPos, cameraDirection, cameraUp);
+	glUniformMatrix4fv(viewLocation, 1, GL_FALSE, glm::value_ptr(view));
 
-	glm::mat4 projection = glm::mat4(1.0f);
-	projection = glm::perspective(glm::radians(90.0f), 4.0f / 3.0f, 0.4f, 50.0f);							//--- 투영 공간 설정: fovy, aspect, near, far
+	// 투영 변환 설정
+	glm::mat4 projection = glm::perspective(glm::radians(90.0f), 4.0f / 3.0f, 0.4f, 50.0f);
+	glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, glm::value_ptr(projection));
 
-	
+	// 객체 렌더링
+	sphere.draw(modelLocation);
+	pillar.draw(modelLocation);
+	segment.draw(modelLocation);
 
-	unsigned int projectionLocation = glGetUniformLocation(shaderProgramID, "projectionTransform"); //--- 투영 변환 값 설정
-	glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, &projection[0][0]);
-
-
-	unsigned int modelLocation = glGetUniformLocation(shaderProgramID, "modelTransform");
-	glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(sphere.matrix));
-
-	glBindVertexArray(sphere.vao);
-	glDrawArrays(GL_TRIANGLES, 0, sphere.obj.size());
-
-
-	glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(pillar.matrix));
-
-	glBindVertexArray(pillar.vao);
-	glDrawArrays(GL_TRIANGLES, 0, pillar.obj.size());
-
-	glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(segment.matrix));
-
-	glBindVertexArray(segment.vao);
-	glDrawArrays(GL_TRIANGLES, 0, segment.obj.size());
-
-
-	glutSwapBuffers(); //--- 화면에 출력하기
+	// 화면 출력
+	glutSwapBuffers();
 }
+
 
 void InitBuffer(Object& input)
 {
@@ -263,3 +272,5 @@ GLvoid TimerFunction(int value) {
 
 
 }
+
+

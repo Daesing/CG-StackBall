@@ -14,6 +14,13 @@ void Object::update(float)
 	matrix = glm::scale(matrix, scale);
 }
 
+void Object::draw(GLint modelLocation) {
+	glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(matrix));
+	glBindVertexArray(vao);
+	glDrawArrays(GL_TRIANGLES, 0, obj.size());
+}
+
+
 
 //ReadObj
 std::vector<glm::vec3> ReadObj(const std::string& filename) {
