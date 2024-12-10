@@ -5,6 +5,14 @@ Object::Object(std::string name) {
 	std::cout << "object: " << name << '\n';
 }
 
+void Object::update(float)
+{
+	// 모델 변환 행렬 갱신
+	matrix = glm::mat4(1.0f);               // 행렬 초기화
+	matrix = glm::translate(matrix, position); // 새로운 위치로 이동
+	matrix = glm::rotate(matrix, glm::radians(angle), glm::vec3(1, 0, 0));
+	matrix = glm::scale(matrix, scale);
+}
 
 
 //ReadObj

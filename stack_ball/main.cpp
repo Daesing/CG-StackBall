@@ -2,7 +2,8 @@
 #include "global.h"
 #include "object.h"
 #include "ball.h"
-
+#include "cylinder.h"
+#include "segment.h"
 #define Width 800
 #define Height 600
 
@@ -19,6 +20,8 @@ std::uniform_real_distribution<double> dis(-0.9, 0.9);
 
 
 Ball sphere("sphere.obj");
+Cylinder pillar("cylinder.obj");
+Segment segment("segment.obj");
 
 GLvoid InitBuffer(Object&);
 char* filetobuf(const char* file);
@@ -49,6 +52,8 @@ void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설�
 	glewInit();
 	make_shaderProgram();
 	InitBuffer(sphere);
+	InitBuffer(pillar);
+	InitBuffer(segment);
 	glutDisplayFunc(drawScene);
 	glutKeyboardFunc(Keyboard);
 	glutReshapeFunc(Reshape);
@@ -56,6 +61,7 @@ void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설�
 	
 	glutMainLoop();
 }
+
 
 GLvoid drawScene() //--- 콜백 함수: 그리기 콜백 함수
 {
@@ -66,6 +72,7 @@ GLvoid drawScene() //--- 콜백 함수: 그리기 콜백 함수
 	glClearColor(rColor, gColor, bColor, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
+	//glEnable(GL_CULL_FACE); // 컬링 활성화
 
 	//--- 렌더링 파이프라인에 세이더 불러오기
 	glUseProgram(shaderProgramID);
@@ -81,9 +88,10 @@ GLvoid drawScene() //--- 콜백 함수: 그리기 콜백 함수
 	glm::mat4 projection = glm::mat4(1.0f);
 	projection = glm::perspective(glm::radians(90.0f), 4.0f / 3.0f, 0.4f, 50.0f);							//--- 투영 공간 설정: fovy, aspect, near, far
 
+	
+
 	unsigned int projectionLocation = glGetUniformLocation(shaderProgramID, "projectionTransform"); //--- 투영 변환 값 설정
 	glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, &projection[0][0]);
-
 
 
 	unsigned int modelLocation = glGetUniformLocation(shaderProgramID, "modelTransform");
@@ -91,6 +99,17 @@ GLvoid drawScene() //--- 콜백 함수: 그리기 콜백 함수
 
 	glBindVertexArray(sphere.vao);
 	glDrawArrays(GL_TRIANGLES, 0, sphere.obj.size());
+
+
+	glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(pillar.matrix));
+
+	glBindVertexArray(pillar.vao);
+	glDrawArrays(GL_TRIANGLES, 0, pillar.obj.size());
+
+	glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(segment.matrix));
+
+	glBindVertexArray(segment.vao);
+	glDrawArrays(GL_TRIANGLES, 0, segment.obj.size());
 
 
 	glutSwapBuffers(); //--- 화면에 출력하기
@@ -230,12 +249,14 @@ GLvoid Keyboard(unsigned char key, int x, int y) {
 //Timer ball animation
 GLvoid TimerFunction(int value) {
 
-	static float lastTime = 0.0f;
-	float currentTime = glutGet(GLUT_ELAPSED_TIME) / 1000.0f; // 초 단위
-	float deltaTime = currentTime - lastTime;
-	lastTime = currentTime;
+	static float last_time = 0.0f;
+	float current_time = glutGet(GLUT_ELAPSED_TIME) / 1000.0f; // 초 단위
+	float delta_time = current_time - last_time;
+	last_time = current_time;
 
-	sphere.update_ball(deltaTime); // 공 상태 업데이트
+	sphere.update(delta_time); // 공 상태 업데이트
+	pillar.update(delta_time);
+	segment.update(delta_time);
 
 	glutTimerFunc(16, TimerFunction, 1);
 	glutPostRedisplay();

@@ -10,7 +10,7 @@ public:
     float initialVelocity;
     Ball(std::string name);
 
-    void update_ball(float deltaTime);
+    void update(float deltaTime) override;
 
 };
 
