@@ -4,6 +4,7 @@
 #include "ball.h"
 #include "cylinder.h"
 #include "segment.h"
+#include "platform.h"
 #define Width 800
 #define Height 600
 
@@ -21,15 +22,9 @@ std::uniform_real_distribution<double> dis(-0.9, 0.9);
 
 Ball sphere("sphere.obj");
 Cylinder pillar("cylinder.obj");
-Segment segment("segment.obj");
-Segment segments[6] = {
-	Segment("segment.obj"),
-	Segment("segment.obj"),
-	Segment("segment.obj"),
-	Segment("segment.obj"),
-	Segment("segment.obj"),
-	Segment("segment.obj"),
-};
+Segment seg("segment.obj");
+Platform* platform;
+
 
 GLvoid InitBuffer(Object&);
 char* filetobuf(const char* file);
@@ -79,7 +74,12 @@ void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설�
 	make_shaderProgram();
 	InitBuffer(sphere);
 	InitBuffer(pillar);
-	InitBuffer(segment);
+	InitBuffer(seg);
+	platform = new Platform(glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, 4.0f, 6);
+	for (auto& segment : platform->segments) {
+		InitBuffer(segment);
+	}
+
 	initializeShaderUniforms();
 	glutDisplayFunc(drawScene);
 	glutKeyboardFunc(Keyboard);
@@ -87,6 +87,7 @@ void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설�
 	glutTimerFunc(15,TimerFunction,1);
 	
 	glutMainLoop();
+	delete platform;
 }
 
 
@@ -117,7 +118,8 @@ void drawScene() {
 	// 객체 렌더링
 	sphere.draw(modelLocation);
 	pillar.draw(modelLocation);
-	segment.draw(modelLocation);
+	//seg.draw(modelLocation);
+	platform->draw(modelLocation);
 
 	// 화면 출력
 	glutSwapBuffers();
@@ -243,8 +245,6 @@ char* filetobuf(const char* file)
 }
 
 
-
-
 GLvoid Keyboard(unsigned char key, int x, int y) {
 	switch (key) {
 	case 'q':
@@ -265,7 +265,8 @@ GLvoid TimerFunction(int value) {
 
 	sphere.update(delta_time); // 공 상태 업데이트
 	pillar.update(delta_time);
-	segment.update(delta_time);
+	seg.update(delta_time);
+	platform->update(delta_time);
 
 	glutTimerFunc(16, TimerFunction, 1);
 	glutPostRedisplay();

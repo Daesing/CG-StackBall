@@ -5,12 +5,18 @@ Object::Object(std::string name) {
 	std::cout << "object: " << name << '\n';
 }
 
+Object::Object() {
+	// 기본 생성자: 아무 작업도 하지 않음
+}
+
 void Object::update(float)
 {
 	// 모델 변환 행렬 갱신
 	matrix = glm::mat4(1.0f);               // 행렬 초기화
 	matrix = glm::translate(matrix, position); // 새로운 위치로 이동
-	matrix = glm::rotate(matrix, glm::radians(angle), glm::vec3(1, 0, 0));
+	matrix = glm::rotate(matrix, glm::radians(rotation.x), glm::vec3(1.0f, 0.0f, 0.0f)); // X축 회전
+	matrix = glm::rotate(matrix, glm::radians(rotation.y), glm::vec3(0.0f, 1.0f, 0.0f)); // Y축 회전
+	matrix = glm::rotate(matrix, glm::radians(rotation.z), glm::vec3(0.0f, 0.0f, 1.0f)); // Z축 회전
 	matrix = glm::scale(matrix, scale);
 }
 
