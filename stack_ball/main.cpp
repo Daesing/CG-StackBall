@@ -4,6 +4,7 @@
 #include "ball.h"
 #include "cylinder.h"
 #include "segment.h"
+#include "ring.h"
 #define Width 800
 #define Height 600
 
@@ -22,6 +23,8 @@ std::uniform_real_distribution<double> dis(-0.9, 0.9);
 Ball sphere("sphere.obj");
 Cylinder pillar("cylinder.obj");
 Segment segment("segment.obj");
+Ring ring("ring.obj");
+
 Segment segments[6] = {
 	Segment("segment.obj"),
 	Segment("segment.obj"),
@@ -40,6 +43,7 @@ GLvoid drawScene();
 GLvoid Keyboard(unsigned char key, int x, int y);
 GLvoid TimerFunction(int value);
 GLvoid Reshape(int w, int h);
+GLvoid Mouse(int button, int state, int x, int y);
 
 
 GLint width, height;
@@ -80,10 +84,12 @@ void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설�
 	InitBuffer(sphere);
 	InitBuffer(pillar);
 	InitBuffer(segment);
+	InitBuffer(ring);
 	initializeShaderUniforms();
 	glutDisplayFunc(drawScene);
 	glutKeyboardFunc(Keyboard);
 	glutReshapeFunc(Reshape);
+	glutMouseFunc(Mouse);
 	glutTimerFunc(15,TimerFunction,1);
 	
 	glutMainLoop();
@@ -104,7 +110,7 @@ void drawScene() {
 	glUseProgram(shaderProgramID);
 
 	// 카메라 설정
-	glm::vec3 cameraPos = glm::vec3(0.0f, 2.0f, 5.0f);
+	glm::vec3 cameraPos = glm::vec3(0.0f, 2.0f, 6.0f);
 	glm::vec3 cameraDirection = glm::vec3(0.0f, 0.0f, 0.0f);
 	glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 	glm::mat4 view = glm::lookAt(cameraPos, cameraDirection, cameraUp);
@@ -117,7 +123,8 @@ void drawScene() {
 	// 객체 렌더링
 	sphere.draw(modelLocation);
 	pillar.draw(modelLocation);
-	segment.draw(modelLocation);
+	//segment.draw(modelLocation);
+	ring.draw(modelLocation);
 
 	// 화면 출력
 	glutSwapBuffers();
@@ -266,10 +273,22 @@ GLvoid TimerFunction(int value) {
 	sphere.update(delta_time); // 공 상태 업데이트
 	pillar.update(delta_time);
 	segment.update(delta_time);
+	ring.update(delta_time);
 
 	glutTimerFunc(16, TimerFunction, 1);
 	glutPostRedisplay();
 
+
+}
+
+GLvoid Mouse(int button, int state, int x, int y) {
+	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
+		sphere.is_fall = true;
+		sphere.position.y = 1.0f;
+	}
+	else {
+		sphere.is_fall = false;
+	}
 
 }
 

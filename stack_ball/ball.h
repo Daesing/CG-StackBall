@@ -8,6 +8,7 @@ public:
     float elasticity;   // Åº¼º °è¼ö
     float groundLevel;  // ¹Ù´Ú À§Ä¡
     float initialVelocity;
+    bool is_fall{ false };
     Ball(std::string name);
 
     void update(float deltaTime) override;
