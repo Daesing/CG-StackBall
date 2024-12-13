@@ -24,9 +24,19 @@ std::uniform_real_distribution<double> dis(-0.9, 0.9);
 
 Ball sphere("sphere.obj");
 Cylinder pillar("cylinder.obj");
-Segment segment("segment.obj");
+//Segment segment("segment.obj");
 Ring ring("ring.obj");
 Rings rings(10);
+
+Segment segments[6]{
+	Segment("segment1.obj"),
+	Segment("segment2.obj"),
+	Segment("segment3.obj"),
+	Segment("segment4.obj"),
+	Segment("segment5.obj"),
+	Segment("segment6.obj"),
+};
+
 
 
 char* filetobuf(const char* file);
@@ -77,9 +87,11 @@ void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설�
 	make_shaderProgram();
 	InitBuffer(sphere);
 	InitBuffer(pillar);
-	InitBuffer(segment);
 	InitBuffer(ring);
 	rings.buffer();
+	for (Segment& segment : segments) {
+		InitBuffer(segment);
+	}
 	initializeShaderUniforms();
 	glutDisplayFunc(drawScene);
 	glutKeyboardFunc(Keyboard);
@@ -118,9 +130,11 @@ void drawScene() {
 	// 객체 렌더링
 	sphere.draw(modelLocation);
 	pillar.draw(modelLocation);
-	//segment.draw(modelLocation);
 	//ring.draw(modelLocation);
-	rings.draw(modelLocation);
+	//rings.draw(modelLocation);
+	for (Segment& segment : segments) {
+		segment.draw(modelLocation);
+	}
 
 	// 화면 출력
 	glutSwapBuffers();
@@ -237,9 +251,11 @@ GLvoid TimerFunction(int value) {
 
 	sphere.update(delta_time); // 공 상태 업데이트
 	pillar.update(delta_time);
-	segment.update(delta_time);
 	ring.update(delta_time);
 	rings.update(delta_time);
+	for (Segment& segment : segments) {
+		segment.update(delta_time);
+	}
 
 	glutTimerFunc(16, TimerFunction, 1);
 	glutPostRedisplay();
