@@ -5,6 +5,8 @@
 #include "cylinder.h"
 #include "segment.h"
 #include "ring.h"
+#include "rings.h"
+#include "func.h"
 #define Width 800
 #define Height 600
 
@@ -24,17 +26,9 @@ Ball sphere("sphere.obj");
 Cylinder pillar("cylinder.obj");
 Segment segment("segment.obj");
 Ring ring("ring.obj");
+Rings rings(10);
 
-Segment segments[6] = {
-	Segment("segment.obj"),
-	Segment("segment.obj"),
-	Segment("segment.obj"),
-	Segment("segment.obj"),
-	Segment("segment.obj"),
-	Segment("segment.obj"),
-};
 
-GLvoid InitBuffer(Object&);
 char* filetobuf(const char* file);
 void make_vertexShaders();
 void make_fragmentShaders();
@@ -85,6 +79,7 @@ void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설�
 	InitBuffer(pillar);
 	InitBuffer(segment);
 	InitBuffer(ring);
+	rings.buffer();
 	initializeShaderUniforms();
 	glutDisplayFunc(drawScene);
 	glutKeyboardFunc(Keyboard);
@@ -124,43 +119,13 @@ void drawScene() {
 	sphere.draw(modelLocation);
 	pillar.draw(modelLocation);
 	//segment.draw(modelLocation);
-	ring.draw(modelLocation);
+	//ring.draw(modelLocation);
+	rings.draw(modelLocation);
 
 	// 화면 출력
 	glutSwapBuffers();
 }
 
-
-void InitBuffer(Object& input)
-{
-	glGenVertexArrays(1, &input.vao); // VAO 생성
-	glBindVertexArray(input.vao);
-
-	for (int i = 1; i < input.obj.size(); i += 2) {
-		input.obj[i] = input.color;
-	}
-
-	// 데이터 분리: 정점 및 색상
-	std::vector<glm::vec3> vertices, colors;
-	for (size_t i = 0; i < input.obj.size(); i += 2) {
-		vertices.push_back(input.obj[i]);     // 정점
-		colors.push_back(input.obj[i + 1]);  // 색상
-	}
-
-	glGenBuffers(2, input.vbo); // 두 개의 VBO 생성
-
-	// 1. 정점 데이터 VBO
-	glBindBuffer(GL_ARRAY_BUFFER, input.vbo[0]);
-	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), vertices.data(), GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-	glEnableVertexAttribArray(0);
-
-	// 2. 색상 데이터 VBO
-	glBindBuffer(GL_ARRAY_BUFFER, input.vbo[1]);
-	glBufferData(GL_ARRAY_BUFFER, colors.size() * sizeof(glm::vec3), colors.data(), GL_STATIC_DRAW);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-	glEnableVertexAttribArray(1);
-}
 
 //--- 버텍스 세이더 객체 만들기
 void make_vertexShaders()
@@ -274,6 +239,7 @@ GLvoid TimerFunction(int value) {
 	pillar.update(delta_time);
 	segment.update(delta_time);
 	ring.update(delta_time);
+	rings.update(delta_time);
 
 	glutTimerFunc(16, TimerFunction, 1);
 	glutPostRedisplay();

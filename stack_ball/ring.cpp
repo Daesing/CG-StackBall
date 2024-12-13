@@ -8,7 +8,7 @@ Ring::Ring(std::string name) :Object(name)
 
 void Ring::update(float delta_time)
 {
-	rotation.y += 3;
+	rotation.y += 80 * delta_time;
 	Object::update(delta_time);
 
 }
