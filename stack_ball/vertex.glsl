@@ -1,17 +1,28 @@
 #version 330 core
+
 //--- in_Position: attribute index 0
 //--- in_Color: attribute index 1
-layout (location = 0) in vec3 in_Position; //--- ìœ„ì¹˜ ë³€ìˆ˜: attribute position 0
-layout (location = 1) in vec3 in_Color; //--- ì»¬ëŸ¬ ë³€ìˆ˜: attribute position 1
-out vec3 out_Color; //--- í”„ë˜ê·¸ë¨¼íŠ¸ ì„¸ì´ë”ì—ê²Œ ì „ë‹¬
-uniform mat4 modelTransform; 
-uniform mat4 projectionTransform;
+
+layout (location = 0) in vec3 in_Position;	//---À§Ä¡ º¯¼ö: attribute position 0
+layout (location = 1) in vec3 vNormal;		
+layout (location = 2) in vec3 in_Color;		//---ÄÃ·¯ º¯¼ö: attribute position 2
+
+
+out vec3 FragPos;
+out vec3 out_Color;
+out vec3 Normal;
+
+uniform mat4 modelTransform;
 uniform mat4 viewTransform;
+uniform mat4 projectionTransform;
 
-void main(void)
+void main()
 {
-gl_Position = projectionTransform * viewTransform  * modelTransform * vec4 (in_Position.x, in_Position.y, in_Position.z, 1.0);
-out_Color = in_Color;
+	gl_Position = projectionTransform * viewTransform * modelTransform * vec4 (in_Position.x, in_Position.y, in_Position.z, 1.0);	
+	
+	FragPos = vec3(modelTransform * vec4(in_Position, 1.0));
 
+	out_Color = in_Color;						
 
+	Normal = vNormal;
 }

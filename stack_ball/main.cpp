@@ -4,6 +4,9 @@
 #include "ball.h"
 #include "cylinder.h"
 #include "segment.h"
+#include "ring.h"
+#include "rings.h"
+#include "func.h"
 #define Width 800
 #define Height 600
 
@@ -21,17 +24,10 @@ std::uniform_real_distribution<double> dis(-0.9, 0.9);
 
 Ball sphere("sphere.obj");
 Cylinder pillar("cylinder.obj");
-Segment segment("segment.obj");
-Segment segments[6] = {
-	Segment("segment.obj"),
-	Segment("segment.obj"),
-	Segment("segment.obj"),
-	Segment("segment.obj"),
-	Segment("segment.obj"),
-	Segment("segment.obj"),
-};
+Rings rings(10);
 
-GLvoid InitBuffer(Object&);
+
+
 char* filetobuf(const char* file);
 void make_vertexShaders();
 void make_fragmentShaders();
@@ -40,6 +36,7 @@ GLvoid drawScene();
 GLvoid Keyboard(unsigned char key, int x, int y);
 GLvoid TimerFunction(int value);
 GLvoid Reshape(int w, int h);
+GLvoid Mouse(int button, int state, int x, int y);
 
 
 GLint width, height;
@@ -48,6 +45,7 @@ GLuint vertexShader; //--- 버텍스 세이더 객체
 GLuint fragmentShader; //--- 프래그먼트 세이더 객체
 GLchar* vertexSource, * fragmentSource; //--- 소스코드 저장 변수
 GLint modelLocation, viewLocation, projectionLocation;
+glm::vec3 cameraPos = glm::vec3(0.0f, 2.0f, 6.0f);
 
 
 // 초기화 함수에서 유니폼 위치를 가져옵니다.
@@ -79,11 +77,12 @@ void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설�
 	make_shaderProgram();
 	InitBuffer(sphere);
 	InitBuffer(pillar);
-	InitBuffer(segment);
+	rings.buffer();
 	initializeShaderUniforms();
 	glutDisplayFunc(drawScene);
 	glutKeyboardFunc(Keyboard);
 	glutReshapeFunc(Reshape);
+	glutMouseFunc(Mouse);
 	glutTimerFunc(15,TimerFunction,1);
 	
 	glutMainLoop();
@@ -104,7 +103,7 @@ void drawScene() {
 	glUseProgram(shaderProgramID);
 
 	// 카메라 설정
-	glm::vec3 cameraPos = glm::vec3(0.0f, 2.0f, 5.0f);
+	
 	glm::vec3 cameraDirection = glm::vec3(0.0f, 0.0f, 0.0f);
 	glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 	glm::mat4 view = glm::lookAt(cameraPos, cameraDirection, cameraUp);
@@ -117,43 +116,13 @@ void drawScene() {
 	// 객체 렌더링
 	sphere.draw(modelLocation);
 	pillar.draw(modelLocation);
-	segment.draw(modelLocation);
+	//ring.draw(modelLocation);
+	rings.draw(modelLocation);
 
 	// 화면 출력
 	glutSwapBuffers();
 }
 
-
-void InitBuffer(Object& input)
-{
-	glGenVertexArrays(1, &input.vao); // VAO 생성
-	glBindVertexArray(input.vao);
-
-	for (int i = 1; i < input.obj.size(); i += 2) {
-		input.obj[i] = input.color;
-	}
-
-	// 데이터 분리: 정점 및 색상
-	std::vector<glm::vec3> vertices, colors;
-	for (size_t i = 0; i < input.obj.size(); i += 2) {
-		vertices.push_back(input.obj[i]);     // 정점
-		colors.push_back(input.obj[i + 1]);  // 색상
-	}
-
-	glGenBuffers(2, input.vbo); // 두 개의 VBO 생성
-
-	// 1. 정점 데이터 VBO
-	glBindBuffer(GL_ARRAY_BUFFER, input.vbo[0]);
-	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), vertices.data(), GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-	glEnableVertexAttribArray(0);
-
-	// 2. 색상 데이터 VBO
-	glBindBuffer(GL_ARRAY_BUFFER, input.vbo[1]);
-	glBufferData(GL_ARRAY_BUFFER, colors.size() * sizeof(glm::vec3), colors.data(), GL_STATIC_DRAW);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-	glEnableVertexAttribArray(1);
-}
 
 //--- 버텍스 세이더 객체 만들기
 void make_vertexShaders()
@@ -265,11 +234,22 @@ GLvoid TimerFunction(int value) {
 
 	sphere.update(delta_time); // 공 상태 업데이트
 	pillar.update(delta_time);
-	segment.update(delta_time);
+	rings.update(delta_time);
 
 	glutTimerFunc(16, TimerFunction, 1);
 	glutPostRedisplay();
 
+
+}
+
+GLvoid Mouse(int button, int state, int x, int y) {
+	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
+		sphere.is_fall = true;
+		sphere.position.y = 1.0f;
+	}
+	else {
+		sphere.is_fall = false;
+	}
 
 }
 

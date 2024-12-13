@@ -135,14 +135,24 @@
     <ClCompile Include="ball.cpp" />
     <ClCompile Include="ball.h" />
     <ClCompile Include="cylinder.cpp" />
+    <ClCompile Include="func.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="object.cpp" />
+    <ClCompile Include="ring.cpp" />
+    <ClCompile Include="rings.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="segment.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cylinder.h" />
+    <ClInclude Include="func.h" />
     <ClInclude Include="global.h" />
     <ClInclude Include="object.h" />
+    <ClInclude Include="ring.h" />
+    <ClInclude Include="rings.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="segment.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
