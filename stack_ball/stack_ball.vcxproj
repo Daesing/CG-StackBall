@@ -139,7 +139,9 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="object.cpp" />
     <ClCompile Include="ring.cpp" />
-    <ClCompile Include="rings.cpp" />
+    <ClCompile Include="rings.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="segment.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -148,7 +150,9 @@
     <ClInclude Include="global.h" />
     <ClInclude Include="object.h" />
     <ClInclude Include="ring.h" />
-    <ClInclude Include="rings.h" />
+    <ClInclude Include="rings.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="segment.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

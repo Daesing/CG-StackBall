@@ -10,7 +10,7 @@ Ball::Ball(std::string name):
       initialVelocity(6.0f) // 초기 속도 설정
 {
     color = glm::vec3(1.0f, 0.0f, 0.0f);    // 공의 색상
-    position = glm::vec3(0.0f, 2.0f, 4.0f); // 초기 위치
+    position = glm::vec3(0.0f, 2.0f, 3.7f); // 초기 위치
     scale = glm::vec3(0.5, 0.5, 0.5);
 }
 

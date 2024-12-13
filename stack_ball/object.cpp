@@ -1,4 +1,5 @@
 #include "object.h"
+#include "func.h"
 
 Object::Object(std::string name) {
 	obj = ReadObj(name);
@@ -14,6 +15,7 @@ void Object::update(float)
 	matrix = glm::rotate(matrix, glm::radians(rotation.y), glm::vec3(0, 1, 0));
 	matrix = glm::rotate(matrix, glm::radians(rotation.z), glm::vec3(0, 0, 1));
 	matrix = glm::scale(matrix, scale);
+	change_color(color);
 }
 
 void Object::draw(GLint modelLocation) {
@@ -22,70 +24,116 @@ void Object::draw(GLint modelLocation) {
 	glDrawArrays(GL_TRIANGLES, 0, obj.size());
 }
 
+void Object::change_color(glm::vec3 color)
+{
+	for (size_t i = 0; i < obj.size(); i += 9) { // Iterate every 9 floats (one vertex)
+		obj[i + 6] = color.x; // Update red channel
+		obj[i + 7] = color.y; // Update green channel
+		obj[i + 8] = color.z; // Update blue channel
+	}
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, obj.size() * sizeof(float), &obj[0]);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
 
 
 //ReadObj
-std::vector<glm::vec3> ReadObj(const std::string& filename) {
+std::vector<float> ReadObj(const std::string& filename) {
 	std::ifstream in{ filename };
 	if (!in) {
-		std::cout << filename << " file read failed\n";
+		std::cerr << filename << " file read failed\n";
 		exit(1);
 	}
-	std::vector<glm::vec3> vertex;
-	std::vector<glm::ivec3> index;
-	std::vector<glm::ivec2> lineIndex;
+
+	std::vector<glm::vec3> vertex;       // Vertex positions
+	std::vector<glm::vec3> normal;       // Vertex normals
+	std::vector<glm::ivec3> index;       // Face indices (vertex)
+	std::vector<glm::ivec3> normalIndex; // Face indices (normal)
+	std::vector<float> data;             // Interleaved data for OpenGL
+
+	glm::vec3 defaultNormal(0.0f, 0.0f, 1.0f);
+
 	while (in) {
 		std::string line;
 		std::getline(in, line);
-		std::stringstream ss{ line };
-		std::string str;
-		ss >> str;
-		if (str == "v") {
+		std::stringstream ss(line);
+		std::string type;
+		ss >> type;
+
+		if (type == "v") {
 			glm::vec3 v;
-			for (int i = 0; i < 3; ++i) {
-				std::string subStr;
-				ss >> subStr;
-				v[i] = std::stof(subStr);
-			}
+			ss >> v.x >> v.y >> v.z;
 			vertex.push_back(v);
 		}
-		else if (str == "f") {
-			glm::ivec3 f;
-			for (int i = 0; i < 3; ++i) {
-				std::string substr;
-				ss >> substr;
-				std::stringstream subss{ substr };
-				std::string vIdx;
-				std::getline(subss, vIdx, '/');
-				f[i] = std::stoi(vIdx) - 1;
-			}
-			index.push_back(f);
+		else if (type == "vn") {
+			glm::vec3 vn;
+			ss >> vn.x >> vn.y >> vn.z;
+			normal.push_back(vn);
 		}
-		else if (str == "l") {
-			glm::ivec2 l;
-			for (int i = 0; i < 2; ++i) {
-				std::string substr;
-				ss >> substr;
-				l[i] = std::stoi(substr) - 1;
+		else if (type == "f") {
+			std::vector<int> face;            // Á¤Á¡ ÀÎµ¦½º ÀúÀå
+			std::vector<int> faceNormal;      // ¹ý¼± ÀÎµ¦½º ÀúÀå
+			std::string token;
+
+			while (ss >> token) {
+				std::stringstream tokenStream(token);
+				std::string vIdx, nIdx;
+
+				std::getline(tokenStream, vIdx, '/'); // Á¤Á¡ ÀÎµ¦½º
+				tokenStream.ignore(std::numeric_limits<std::streamsize>::max(), '/'); // ÅØ½ºÃ³ ÁÂÇ¥ ¹«½Ã
+				std::getline(tokenStream, nIdx, '/'); // ¹ý¼± ÀÎµ¦½º
+
+				face.push_back(std::stoi(vIdx) - 1);
+				faceNormal.push_back(nIdx.empty() ? -1 : (std::stoi(nIdx) - 1));
 			}
-			lineIndex.push_back(l);
+
+			// »ï°¢ÇüÀ¸·Î ºÐÇÒ
+			for (size_t i = 1; i < face.size() - 1; ++i) {
+				index.push_back(glm::ivec3(face[0], face[i], face[i + 1]));
+				normalIndex.push_back(glm::ivec3(faceNormal[0], faceNormal[i], faceNormal[i + 1]));
+			}
+		}
+
+	}
+	// Combine vertex and normal data into a single array
+	for (size_t i = 0; i < index.size(); ++i) {
+		for (int j = 0; j < 3; ++j) {
+			int vIdx = index[i][j];
+			int nIdx = normalIndex[i][j];
+
+			// Add vertex position
+			if (vIdx >= 0 && vIdx < vertex.size()) {
+				data.push_back(vertex[vIdx].x);
+				data.push_back(vertex[vIdx].y);
+				data.push_back(vertex[vIdx].z);
+			}
+			else {
+				std::cerr << "Invalid vertex index: " << vIdx << "\n";
+				data.push_back(0.0f); // Fallback
+				data.push_back(0.0f);
+				data.push_back(0.0f);
+			}
+
+			// Add normal
+			if (nIdx >= 0 && nIdx < normal.size()) {
+				data.push_back(normal[nIdx].x);
+				data.push_back(normal[nIdx].y);
+				data.push_back(normal[nIdx].z);
+			}
+			else {
+				data.push_back(defaultNormal.x);
+				data.push_back(defaultNormal.y);
+				data.push_back(defaultNormal.z);
+			}
+
+			// Add random color
+			data.push_back(0);
+			data.push_back(0);
+			data.push_back(0);
 		}
 	}
-	std::vector<glm::vec3> data;
-	for (auto& f : index) {
-		data.push_back(vertex[f[0]]);
-		data.push_back(glm::vec3(rand() / float(RAND_MAX), rand() / float(RAND_MAX), rand() / float(RAND_MAX)));
-		data.push_back(vertex[f[1]]);
-		data.push_back(glm::vec3(rand() / float(RAND_MAX), rand() / float(RAND_MAX), rand() / float(RAND_MAX)));
-		data.push_back(vertex[f[2]]);
-		data.push_back(glm::vec3(rand() / float(RAND_MAX), rand() / float(RAND_MAX), rand() / float(RAND_MAX)));
-	}
-	for (auto& l : lineIndex) {
-		data.push_back(vertex[l[0]]);
-		data.push_back(glm::vec3(rand() / float(RAND_MAX), rand() / float(RAND_MAX), rand() / float(RAND_MAX)));
-		data.push_back(vertex[l[1]]);
-		data.push_back(glm::vec3(rand() / float(RAND_MAX), rand() / float(RAND_MAX), rand() / float(RAND_MAX)));
-	}
-	std::cout << filename << " File Read, " << data.size() / 2 << " Vertices Exists." << std::endl;
+
+	std::cout << filename << " File Read, " << index.size() << " Faces (" << data.size() / 9 << " Vertices) Exists." << std::endl;
 	return data;
 }
+

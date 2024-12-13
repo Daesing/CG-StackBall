@@ -1,11 +1,14 @@
 #pragma once
-#include "object.h"
+#include "segment.h"
 
-class Ring :public Object {
+class Ring {
 public:
-	Ring(std::string);
+	std::vector<Segment> ring;
 
-	void update(float delta_time) override;
-
-
+	Ring();
+	void update(float delta_time);
+	void buffer();
+	void draw(GLint);
 };
+
+

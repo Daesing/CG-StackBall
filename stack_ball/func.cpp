@@ -2,31 +2,35 @@
 
 void InitBuffer(Object& input)
 {
-	glGenVertexArrays(1, &input.vao); // VAO 생성
+	glGenVertexArrays(1, &input.vao);
+	glGenBuffers(1, input.vbo);
+
 	glBindVertexArray(input.vao);
-
-	for (int i = 1; i < input.obj.size(); i += 2) {
-		input.obj[i] = input.color;
-	}
-
-	// 데이터 분리: 정점 및 색상
-	std::vector<glm::vec3> vertices, colors;
-	for (size_t i = 0; i < input.obj.size(); i += 2) {
-		vertices.push_back(input.obj[i]);     // 정점
-		colors.push_back(input.obj[i + 1]);  // 색상
-	}
-
-	glGenBuffers(2, input.vbo); // 두 개의 VBO 생성
-
-	// 1. 정점 데이터 VBO
 	glBindBuffer(GL_ARRAY_BUFFER, input.vbo[0]);
-	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), vertices.data(), GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
+	// 업로드 데이터는 float 배열로 전달
+	glBufferData(GL_ARRAY_BUFFER, input.obj.size() * sizeof(float), &input.obj[0], GL_STATIC_DRAW);
+
+	// Vertex Attributes 설정 (Vertex, Normal, Color)
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)0); // Position
 	glEnableVertexAttribArray(0);
 
-	// 2. 색상 데이터 VBO
-	glBindBuffer(GL_ARRAY_BUFFER, input.vbo[1]);
-	glBufferData(GL_ARRAY_BUFFER, colors.size() * sizeof(glm::vec3), colors.data(), GL_STATIC_DRAW);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)(3 * sizeof(float))); // Normal
 	glEnableVertexAttribArray(1);
+
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(float), (void*)(6 * sizeof(float))); // Color
+	glEnableVertexAttribArray(2);
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+
+
+
+	glUseProgram(shaderProgramID);
+	unsigned int lightPosLocation = glGetUniformLocation(shaderProgramID, "lightPos");
+	glUniform3f(lightPosLocation, 0.0, 3.0, 5.0);
+	unsigned int lightColorLocation = glGetUniformLocation(shaderProgramID, "lightColor");
+	glUniform3f(lightColorLocation, 1.0, 1.0, 1.0);
+	unsigned int viewPosLocation = glGetUniformLocation(shaderProgramID, "viewPos");
+	glUniform3f(viewPosLocation, cameraPos.x, cameraPos.y, cameraPos.z);
 }

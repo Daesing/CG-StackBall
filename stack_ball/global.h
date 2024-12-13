@@ -13,3 +13,7 @@
 #include <string>
 #include <vector>
 #include <sstream>
+
+
+extern GLuint shaderProgramID; //--- 세이더 프로그램 이름
+extern glm::vec3 cameraPos;

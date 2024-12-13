@@ -24,18 +24,7 @@ std::uniform_real_distribution<double> dis(-0.9, 0.9);
 
 Ball sphere("sphere.obj");
 Cylinder pillar("cylinder.obj");
-//Segment segment("segment.obj");
-Ring ring("ring.obj");
 Rings rings(10);
-
-Segment segments[6]{
-	Segment("segment1.obj"),
-	Segment("segment2.obj"),
-	Segment("segment3.obj"),
-	Segment("segment4.obj"),
-	Segment("segment5.obj"),
-	Segment("segment6.obj"),
-};
 
 
 
@@ -56,6 +45,7 @@ GLuint vertexShader; //--- 버텍스 세이더 객체
 GLuint fragmentShader; //--- 프래그먼트 세이더 객체
 GLchar* vertexSource, * fragmentSource; //--- 소스코드 저장 변수
 GLint modelLocation, viewLocation, projectionLocation;
+glm::vec3 cameraPos = glm::vec3(0.0f, 2.0f, 6.0f);
 
 
 // 초기화 함수에서 유니폼 위치를 가져옵니다.
@@ -87,11 +77,7 @@ void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설�
 	make_shaderProgram();
 	InitBuffer(sphere);
 	InitBuffer(pillar);
-	InitBuffer(ring);
 	rings.buffer();
-	for (Segment& segment : segments) {
-		InitBuffer(segment);
-	}
 	initializeShaderUniforms();
 	glutDisplayFunc(drawScene);
 	glutKeyboardFunc(Keyboard);
@@ -117,7 +103,7 @@ void drawScene() {
 	glUseProgram(shaderProgramID);
 
 	// 카메라 설정
-	glm::vec3 cameraPos = glm::vec3(0.0f, 2.0f, 6.0f);
+	
 	glm::vec3 cameraDirection = glm::vec3(0.0f, 0.0f, 0.0f);
 	glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 	glm::mat4 view = glm::lookAt(cameraPos, cameraDirection, cameraUp);
@@ -131,10 +117,7 @@ void drawScene() {
 	sphere.draw(modelLocation);
 	pillar.draw(modelLocation);
 	//ring.draw(modelLocation);
-	//rings.draw(modelLocation);
-	for (Segment& segment : segments) {
-		segment.draw(modelLocation);
-	}
+	rings.draw(modelLocation);
 
 	// 화면 출력
 	glutSwapBuffers();
@@ -251,11 +234,7 @@ GLvoid TimerFunction(int value) {
 
 	sphere.update(delta_time); // 공 상태 업데이트
 	pillar.update(delta_time);
-	ring.update(delta_time);
 	rings.update(delta_time);
-	for (Segment& segment : segments) {
-		segment.update(delta_time);
-	}
 
 	glutTimerFunc(16, TimerFunction, 1);
 	glutPostRedisplay();
