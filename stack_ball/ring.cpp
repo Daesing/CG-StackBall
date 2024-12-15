@@ -82,9 +82,8 @@ void Ring::break_ring(float delta_time, glm::vec3 ball_pos,int& score) {
         if (glm::abs(segment.position.x - ball_pos.x) <= 0.1f &&  // X축 충돌 범위
             glm::abs(segment.position.y - ball_pos.y) <= 1.0f) { // Y축 충돌 범위
 
-            if (fabs(segment.color.g - 1.0f) < 0.0001f && fabs(segment.color.b - 1.0f) < 0.0001f) {
+            if (segment.color.g == 1.0f && segment.color.b == 1.0f) {
                 broken = true;
-                std::cout << "color.g: " << segment.color.g << ", color.b: " << segment.color.b << std::endl;
                 return; // 더 이상 확인할 필요 없음
             }
 

@@ -82,7 +82,7 @@ void Rings::add_ring()
         rings[newIndex].ring[j].rotation.y = rings[newIndex - 1].ring[j].rotation.y +  newIndex - 1* 3;
     }
 
-
+    rings.back().rotation = rings.front().rotation;
     
 
     rings.back().buffer(); // 새로 추가된 링만 버퍼링
@@ -113,7 +113,7 @@ void Rings::increase_rotation()
     for (Ring& ring : rings) {
         ring.rotation += 10;
     }
-    std::cout << "current_speed: " << rings.front().rotation << '\n';
+    std::cout << "current_speed: " << rings.back().rotation << '\n';
 }
 
 
