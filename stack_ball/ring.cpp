@@ -21,12 +21,30 @@ void Ring::update(float delta_time) {
             // 세그먼트 위치 변경
             segment.position.y += delta_time * 3.0f;
             switch (cnt) {
-            case 0: segment.position.x -= delta_time * 3.0f; break;
-            case 1: segment.position.x -= delta_time * 5.0f; break;
-            case 2: segment.position.x += delta_time * 3.0f; break;
-            case 3: segment.position.x += delta_time * 5.0f; break;
-            case 4: segment.position.x += delta_time * 4.0f; break;
-            case 5: segment.position.x -= delta_time * 4.0f; break;
+            case 0: 
+                segment.position.x -= delta_time * 3.0f; 
+                segment.rotation.z += delta_time * 60;
+                break;
+            case 1: 
+                segment.position.x -= delta_time * 5.0f;
+                segment.rotation.z += delta_time * 60;
+                break;
+            case 2: 
+                segment.position.x += delta_time * 3.0f; 
+                segment.rotation.z -= delta_time * 60;
+                break;
+            case 3: 
+                segment.position.x += delta_time * 5.0f;
+                segment.rotation.z += delta_time * 60;
+                break;
+            case 4: 
+                segment.position.x += delta_time * 4.0f;
+                segment.rotation.z -= delta_time * 60; 
+                break;
+            case 5: 
+                segment.position.x -= delta_time * 4.0f;
+                segment.rotation.z += delta_time * 60;
+                break;
             default: break;
             }
         }
@@ -37,7 +55,8 @@ void Ring::update(float delta_time) {
         }
 
         // 회전과 업데이트 수행
-        segment.rotation.y += 80 * delta_time;
+        segment.position += position * delta_time;
+        segment.rotation.y += rotation * delta_time;
         segment.update(delta_time);
         ++cnt;
     }
@@ -57,21 +76,20 @@ void Ring::draw(GLint modelLocation)
     }
 }
 
-void Ring::break_ring(float delta_time, glm::vec3 ball_pos, bool& gameReset) {
+void Ring::break_ring(float delta_time, glm::vec3 ball_pos,int& score) {
     for (Segment& segment : ring) {
         // 충돌 검사
-        if (glm::abs(segment.position.y - ball_pos.y) <= 1.0f) {
-            // 특정 색상일 경우 링을 부숨
-            if (segment.color == glm::vec3(0, 1, 1)) {
+        if (glm::abs(segment.position.x - ball_pos.x) <= 0.1f &&  // X축 충돌 범위
+            glm::abs(segment.position.y - ball_pos.y) <= 1.0f) { // Y축 충돌 범위
+
+            if (fabs(segment.color.g - 1.0f) < 0.0001f && fabs(segment.color.b - 1.0f) < 0.0001f) {
                 broken = true;
-                break;
+                std::cout << "color.g: " << segment.color.g << ", color.b: " << segment.color.b << std::endl;
+                return; // 더 이상 확인할 필요 없음
             }
-            else {
-                // 다른 색상의 블록과 충돌하면 게임 초기화
-                //gameReset = true;
-                return;
-            }
+
         }
     }
 }
+
 

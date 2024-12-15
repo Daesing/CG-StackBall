@@ -17,6 +17,7 @@ Ball sphere("sphere.obj");
 Cylinder pillar("cylinder.obj");
 Rings rings(10);
 bool is_mouse_pressed{ false };
+int crushed_stack{ 0 };
 
 
 
@@ -226,7 +227,7 @@ GLvoid TimerFunction(int value) {
 
 	sphere.update(delta_time); // 공 상태 업데이트
 	pillar.update(delta_time);
-	rings.update(delta_time,is_mouse_pressed,sphere.position);
+	rings.update(delta_time,is_mouse_pressed,sphere.position,crushed_stack);
 
 	glutTimerFunc(16, TimerFunction, 1);
 	glutPostRedisplay();
@@ -244,6 +245,7 @@ GLvoid Mouse(int button, int state, int x, int y) {
 	else {
 		is_mouse_pressed = false;
 		sphere.is_fall = false;
+		rings.set_pos();
 		
 		
 	}
