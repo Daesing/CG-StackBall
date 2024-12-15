@@ -14,6 +14,8 @@
 #include <vector>
 #include <sstream>
 
+extern std::default_random_engine dre;
+extern std::random_device rd;
 
 extern GLuint shaderProgramID; //--- 세이더 프로그램 이름
 extern glm::vec3 cameraPos;

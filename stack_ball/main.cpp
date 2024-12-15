@@ -10,21 +10,13 @@
 #define Width 800
 #define Height 600
 
-std::random_device seeder;
-const auto seed = seeder.entropy() ? seeder() : time(nullptr);
-std::mt19937 gen(static_cast<std::mt19937::result_type>(seed));
-std::uniform_real_distribution<double> dist(0, 1.0f);
-
-std::random_device seeder2;
-const auto seed2 = seeder2.entropy() ? seeder2() : time(nullptr);
-std::mt19937 ge(static_cast<std::mt19937::result_type>(seed2));
-std::uniform_real_distribution<double> dis(-0.9, 0.9);
-
-
+std::random_device rd;
+std::default_random_engine dre(rd());
 
 Ball sphere("sphere.obj");
 Cylinder pillar("cylinder.obj");
 Rings rings(10);
+bool is_mouse_pressed{ false };
 
 
 
@@ -70,7 +62,7 @@ void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설�
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
 	glutInitWindowPosition(100, 100);
 	glutInitWindowSize(Width, Height);
-	glutCreateWindow("Example1");
+	glutCreateWindow("Stack Ball");
 	//--- GLEW 초기화하기
 	glewExperimental = GL_TRUE;
 	glewInit();
@@ -82,8 +74,8 @@ void main(int argc, char** argv) //--- 윈도우 출력하고 콜백함수 설�
 	glutDisplayFunc(drawScene);
 	glutKeyboardFunc(Keyboard);
 	glutReshapeFunc(Reshape);
-	glutMouseFunc(Mouse);
 	glutTimerFunc(15,TimerFunction,1);
+	glutMouseFunc(Mouse);
 	
 	glutMainLoop();
 }
@@ -234,7 +226,7 @@ GLvoid TimerFunction(int value) {
 
 	sphere.update(delta_time); // 공 상태 업데이트
 	pillar.update(delta_time);
-	rings.update(delta_time);
+	rings.update(delta_time,is_mouse_pressed,sphere.position);
 
 	glutTimerFunc(16, TimerFunction, 1);
 	glutPostRedisplay();
@@ -244,11 +236,16 @@ GLvoid TimerFunction(int value) {
 
 GLvoid Mouse(int button, int state, int x, int y) {
 	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
+		is_mouse_pressed = true;
 		sphere.is_fall = true;
 		sphere.position.y = 1.0f;
+		
 	}
 	else {
+		is_mouse_pressed = false;
 		sphere.is_fall = false;
+		
+		
 	}
 
 }
