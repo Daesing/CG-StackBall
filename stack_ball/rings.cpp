@@ -11,20 +11,18 @@ Rings::Rings(int count) {
     stack_rings();
 }
 
-void Rings::update(float delta_time, bool mouse_state, glm::vec3 ball_pos) {
+void Rings::update(float delta_time, bool mouse_state, glm::vec3 ball_pos,int& crushed_stack) {
     bool gameReset = false; // 게임 초기화 플래그
 
     for (Ring& ring : rings) {
         if (mouse_state) {
-            rings.front().break_ring(delta_time, ball_pos, gameReset); // 클릭 중 처리
+            ring.position.y = 5;
+            ring.break_ring(delta_time, ball_pos, crushed_stack); // 클릭 중 처리
+        }
+        else {
+            ring.position.y = 0;
         }
         ring.update(delta_time);
-    }
-
-    // 게임 초기화 조건 확인
-    if (gameReset) {
-        reset_game(); // 게임 초기화 함수 호출
-        return;
     }
 
     // 부서진 링 제거 및 추가
@@ -39,13 +37,12 @@ void Rings::update(float delta_time, bool mouse_state, glm::vec3 ball_pos) {
 
     // 링이 부족하면 추가
     while (rings.size() < 10) {
-        for (int i = 0; i < rings.size(); ++i) {
-            for (int j = 0; j < rings[i].ring.size(); ++j) {
-                rings[i].ring[j].position.y += 1;
-            }
-        }
         add_ring();
+        ++crushed_stack;
+        std::cout << "score: "<<crushed_stack << '\n';
+        set_level(crushed_stack);
     }
+    
 }
 
 
@@ -85,17 +82,39 @@ void Rings::add_ring()
         rings[newIndex].ring[j].rotation.y = rings[newIndex - 1].ring[j].rotation.y +  newIndex - 1* 3;
     }
 
+
     
 
     rings.back().buffer(); // 새로 추가된 링만 버퍼링
 }
 
 
-void Rings::reset_game() {
-    rings.clear(); // 모든 링 제거
-    for (int i = 0; i < 10; ++i) {
-        add_ring(); // 초기 링 추가
+void Rings::set_pos()
+{   
+	for (int i = 0; i < rings.size(); ++i) {
+		for (int j = 0; j < rings[i].ring.size(); ++j) {
+            rings[i].ring[j].position.y += 0.5;
+		}
+	}
+}
+
+void Rings::set_level(int& score)
+{
+    if (score % 20 == 0) {
+        ++level;
+        std::cout << "Level up Now at Level " << level << '\n';
+        increase_rotation();
+        
     }
 }
+
+void Rings::increase_rotation()
+{
+    for (Ring& ring : rings) {
+        ring.rotation += 10;
+    }
+    std::cout << "current_speed: " << rings.front().rotation << '\n';
+}
+
 
 

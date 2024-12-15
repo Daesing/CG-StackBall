@@ -3,7 +3,6 @@
 
 Object::Object(std::string name) {
 	obj = ReadObj(name);
-	std::cout << "object: " << name << '\n';
 }
 
 void Object::update(float)
@@ -133,7 +132,7 @@ std::vector<float> ReadObj(const std::string& filename) {
 		}
 	}
 
-	std::cout << filename << " File Read, " << index.size() << " Faces (" << data.size() / 9 << " Vertices) Exists." << std::endl;
+	//std::cout << filename << " File Read, " << index.size() << " Faces (" << data.size() / 9 << " Vertices) Exists." << std::endl;
 	return data;
 }
 
